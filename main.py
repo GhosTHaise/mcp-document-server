@@ -1,5 +1,8 @@
 from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
+import httpx
+import json
+import os
 
 load_dotenv()
 
@@ -14,8 +17,24 @@ docs_urls = {
     "openai" : "platform.openai.com/docs"
 }
 
-def search_web():
-    ...
+async def search_web(query : string) -> dict | None:
+    payload = json.dumps({"q": query, "num" : 2})
+    
+    headers = {
+         'X-API-KEY': os.getenv("SERPER_API_KEY"),
+         'Content-Type': 'application/json'
+    }
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                SERPER_URL, headers=headers, data=payload, timeout=30.0
+            )
+            
+            response.raise_for_status()
+            return response.json()
+        except httpx.TimeoutException:
+            return {"organic" : []}
 
 def fetch_url():
     ...
