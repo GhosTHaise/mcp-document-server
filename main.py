@@ -6,7 +6,7 @@ load_dotenv()
 mcp = FastMCP("docs")
 
 USER_AGENT = "docs-app/1.0"
-SERPER_URL = ""
+SERPER_URL = "https://google.serper.dev/search"
 
 docs_urls = {
     "langchain" : "python.langchain.com/docs",
