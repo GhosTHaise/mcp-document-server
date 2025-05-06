@@ -17,7 +17,7 @@ docs_urls = {
     "openai" : "platform.openai.com/docs"
 }
 
-async def search_web(query : string) -> dict | None:
+async def search_web(query : str) -> dict | None:
     payload = json.dumps({"q": query, "num" : 2})
     
     headers = {
