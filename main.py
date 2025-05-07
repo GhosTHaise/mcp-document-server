@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import httpx
 import json
 import os
+from bs4 import BeautifulSoup
 
 load_dotenv()
 
@@ -36,8 +37,15 @@ async def search_web(query : str) -> dict | None:
         except httpx.TimeoutException:
             return {"organic" : []}
 
-def fetch_url():
-    ...
+async def fetch_url(url: str):
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, timeout=30.0)
+            soup = BeautifulSoup(response.text, "html.parser")
+            text = soup.get_text()
+            return text
+        except httpx.TimeoutException:
+            return "Timeout error"
 
 @mcp.tool()
 def get_docs():
