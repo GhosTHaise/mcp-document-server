@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import httpx
 import json
 import os
+from bs4 import BeautifulSoup
 
 load_dotenv()
 
@@ -36,16 +37,49 @@ async def search_web(query : str) -> dict | None:
         except httpx.TimeoutException:
             return {"organic" : []}
 
-def fetch_url():
-    ...
+async def fetch_url(url: str):
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, timeout=30.0)
+            soup = BeautifulSoup(response.text, "html.parser")
+            text = soup.get_text()
+            return text
+        except httpx.TimeoutException:
+            return "Timeout error"
 
 @mcp.tool()
-def get_docs():
-    ...
+async def get_docs(query : str, library : str):
+    """
+    Search the latest docs for a given query and library.
+    Supports langchain, openai, and llama-index.
+
+    Args:
+        query: The query to search for (e.g. "Chroma DB")
+        library: The library to search in (e.g. "langchain")
+
+    Returns:
+        Text from the docs
+    """
+    
+    if library not in docs_urls:
+        raise ValueError(f"Library {library} not supported by this tool")
+    
+    query = f"site:{docs_urls[library]} {query}"
+    results = await search_web
+    
+    if len(results["organic"]):
+        return "No results found"
+    
+    text=""
+    for result in results["organic"]:
+        text += await fetch_url(result["link"])
+    
+    return text
+        
 
 def main():
     print("Hello from mcp-document-server!")
 
 
 if __name__ == "__main__":
-    main()
+    mcp.run(transport="stdio")
